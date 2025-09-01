@@ -120,6 +120,20 @@ CACHES = {
     }
 }
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "django.cache": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+    },
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
