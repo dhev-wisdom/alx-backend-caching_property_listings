@@ -23,24 +23,32 @@ def get_redis_cache_metrics():
     """
     Retrieve Redis cache hit/miss metrics and calculate hit ratio.
     """
-    # Get default Redis connection
-    redis_conn = get_redis_connection("default")
+    try:
+        # Get default Redis connection
+        redis_conn = get_redis_connection("default")
 
-    # Get INFO stats
-    info = redis_conn.info(section="stats")
-    hits = info.get("keyspace_hits", 0)
-    misses = info.get("keyspace_misses", 0)
+        # Get INFO stats
+        info = redis_conn.info(section="stats")
+        hits = info.get("keyspace_hits", 0)
+        misses = info.get("keyspace_misses", 0)
 
-    total = hits + misses
-    hit_ratio = (hits / total) * 100 if total > 0 else 0.0
+        total_requests = hits + misses
+        hit_ratio = (hits / total_requests) * 100 if total_requests > 0 else 0.0
 
-    metrics = {
-        "hits": hits,
-        "misses": misses,
-        "hit_ratio_percent": round(hit_ratio, 2)
-    }
+        metrics = {
+            "hits": hits,
+            "misses": misses,
+            "hit_ratio_percent": round(hit_ratio, 2)
+        }
 
-    # Log the metrics
-    logger.info(f"Redis Cache Metrics: Hits={hits}, Misses={misses}, Hit Ratio={metrics['hit_ratio_percent']}%")
+        # Log metrics
+        logger.info(f"Redis Cache Metrics: Hits={hits}, Misses={misses}, Hit Ratio={metrics['hit_ratio_percent']}%")
+        return metrics
 
-    return metrics
+    except Exception as e:
+        logger.error(f"Error retrieving Redis metrics: {str(e)}")
+        return {
+            "hits": 0,
+            "misses": 0,
+            "hit_ratio_percent": 0.0
+        }
